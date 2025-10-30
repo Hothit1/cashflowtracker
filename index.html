@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset & Cashflow Tracker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a1929 0%, #1a2332 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #0f1923;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid #1e3a5f;
+        }
+        
+        h1 {
+            color: #00d4ff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+        
+        h2 {
+            color: #00d4ff;
+            border-bottom: 2px solid #1e3a5f;
+            padding-bottom: 10px;
+            margin: 30px 0 20px 0;
+            font-size: 1.5em;
+        }
+        
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #1a2332;
+            border-radius: 12px;
+            border: 1px solid #1e3a5f;
+            flex-wrap: wrap;
+        }
+        
+        .controls label {
+            font-weight: 600;
+            color: #00d4ff;
+        }
+        
+        .controls input {
+            padding: 10px 15px;
+            border: 1px solid #1e3a5f;
+            background: #0f1923;
+            color: #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 150px;
+        }
+        
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            background: linear-gradient(135deg, #00a8cc 0%, #00d4ff 100%);
+            color: #0a1929;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #00d4ff 0%, #00ffff 100%);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 12px;
+            background: #1a2332;
+            padding: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #1e3a5f;
+        }
+        
+        th:nth-child(4), td:nth-child(4) {
+            min-width: 140px;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #1a3a5f 0%, #1e3a5f 100%);
+            color: #00d4ff;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+        
+        tbody tr:hover {
+            background: #1e2a3a;
+        }
+        
+        tbody tr:last-child:hover {
+            background: #1a3a5f;
+        }
+        
+        td {
+            color: #c0c0c0;
+        }
+        
+        input[type="number"] {
+            padding: 6px 8px;
+            border: 1px solid #1e3a5f;
+            background: #0a1523;
+            color: #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95em;
+            width: 100%;
+            max-width: 120px;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+        }
+        
+        .input-xs {
+            max-width: 70px !important;
+        }
+        
+        .input-price {
+            max-width: 180px !important;
+            min-width: 120px !important;
+        }
+        
+        .input-projection {
+            max-width: 110px !important;
+            background: #1a2a3a !important;
+            border-color: #2a4a6a !important;
+        }
+        
+        .text-right {
+            text-align: right;
+            font-weight: 500;
+        }
+        
+        .summary {
+            margin-top: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, #1a3a5f 0%, #1e2a4a 100%);
+            border-radius: 12px;
+            border: 2px solid #00d4ff;
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.2);
+        }
+        
+        .summary p {
+            margin: 15px 0;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        
+        .summary b {
+            color: #00d4ff;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #00d4ff;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .controls input {
+                width: 100%;
+            }
+            
+            table {
+                font-size: 0.85em;
+            }
+            
+            th, td {
+                padding: 8px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💎 Asset & Cashflow Tracker</h1>
+        
+        <div class="controls">
+            <label for="exrate">USD/VND Rate:</label>
+            <input type="number" step="any" id="exrate" value="24500">
+            <button class="btn" onclick="updateAll()">🔄 Update Prices</button>
+            <label style="margin-left: 20px;">
+                <input type="checkbox" id="manualMode" onchange="toggleManualMode(this.checked)">
+                Manual Price Edit
+            </label>
+            <button class="btn" onclick="resetData()" style="background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%); margin-left: 10px;">🗑️ Reset Data</button>
+            <span id="status" style="margin-left: auto; color: #00d4ff;"></span>
+        </div>
+        
+        <div style="background: #1a2332; padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; border-left: 3px solid #00d4ff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <strong style="color: #00d4ff;">💡 Tip:</strong> 
+                <span style="color: #c0c0c0;">Press F12 to open console and see detailed price fetch logs. Enable "Manual Price Edit" to override crypto prices.</span>
+            </div>
+            <div style="color: #888; font-size: 0.9em;" id="lastUpdate">Last update: Never</div>
+        </div>
+        
+        <h2>📊 Assets Overview</h2>
+        <div class="table-container">
+            <table id="assetsTable">
+                <thead>
+                    <tr>
+                        <th>Asset</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Price (USD)</th>
+                        <th>Value (USD)</th>
+                        <th>6m Projection</th>
+                        <th>1yr Projection</th>
+                        <th>2yr Projection</th>
+                        <th>3yr Projection</th>
+                        <th>4yr Projection</th>
+                        <th>5yr Projection</th>
+                        <th>APY (%)</th>
+                        <th>Monthly CF (USD)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="13" class="loading">Loading assets...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>💰 Expenses & Savings</h2>
+        <div class="table-container">
+            <table id="expensesTable">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Monthly (USD)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="3" class="loading">Loading expenses...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="summary" id="summarySection">
+            <p class="loading">Calculating summary...</p>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIGURATION =====
+        const defaultAssets = [
+            { name: 'BTC', type: 'crypto', symbol: 'bitcoin', amount: 0, price: 0, apy: 0, proj_6m: 0, proj_1yr: 0, proj_2yr: 0, proj_3yr: 0, proj_4yr: 0, proj_5yr: 0 },
+            { name: 'USDT', type: 'crypto', symbol: 'tether', amount: 0, price: 0, apy: 0, proj_6m: 0, proj_1yr: 0, proj_2yr: 0, proj_3yr: 0, proj_4yr: 0, proj_5yr: 0 },
+            { name: 'HYPE', type: 'crypto', symbol: 'hyperliquid', amount: 0, price: 0, apy: 0, proj_6m: 0, proj_1yr: 0, proj_2yr: 0, proj_3yr: 0, proj_4yr: 0, proj_5yr: 0 },
+            { name: 'Real Estate', type: 'manual', symbol: '', amount: 0, price: 0, apy: 0, proj_6m: 0, proj_1yr: 0, proj_2yr: 0, proj_3yr: 0, proj_4yr: 0, proj_5yr: 0 },
+            { name: 'Company', type: 'manual', symbol: '', amount: 0, price: 0, apy: 0, proj_6m: 0, proj_1yr: 0, proj_2yr: 0, proj_3yr: 0, proj_4yr: 0, proj_5yr: 0 },
+            { name: 'VND Account', type: 'manual', symbol: '', amount: 0, price: 1, apy: 0, proj_6m: 1, proj_1yr: 1, proj_2yr: 1, proj_3yr: 1, proj_4yr: 1, proj_5yr: 1 },
+        ];
+        
+        const defaultExpenses = [
+            { category: 'Daily', desc: 'Daily expenses', amount: 0 },
+            { category: 'School', desc: 'School for son', amount: 0 },
+            { category: 'Other', desc: 'Other expenses', amount: 0 },
+            { category: 'Savings', desc: 'Monthly savings', amount: 0 },
+        ];
+        
+        const projectionPeriods = [
+            { key: '6m', months: 6 },
+            { key: '1yr', months: 12 },
+            { key: '2yr', months: 24 },
+            { key: '3yr', months: 36 },
+            { key: '4yr', months: 48 },
+            { key: '5yr', months: 60 },
+        ];
+        
+        // ===== STATE MANAGEMENT =====
+        let assets = JSON.parse(localStorage.getItem('assets') || 'null') || JSON.parse(JSON.stringify(defaultAssets));
+        let expenses = JSON.parse(localStorage.getItem('expenses') || 'null') || JSON.parse(JSON.stringify(defaultExpenses));
+        let exchangeRate = parseFloat(localStorage.getItem('exchangeRate')) || 24500;
+        let manualPriceMode = localStorage.getItem('manualPriceMode') === 'true' || false;
+        let lastPriceUpdate = localStorage.getItem('lastPriceUpdate') || 'Never';
+        
+        // ===== DATA MIGRATION =====
+        let needsSave = false;
+        
+        // Fix old 'hype' symbol to correct 'hyperliquid'
+        assets.forEach(asset => {
+            if (asset.name === 'HYPE' && asset.symbol === 'hype') {
+                asset.symbol = 'hyperliquid';
+                console.log('✅ Fixed HYPE symbol: hype → hyperliquid');
+                needsSave = true;
+            }
+            
+            // Migrate old 'projected' field to new projection fields
+            if (asset.projected !== undefined) {
+                const projValue = asset.projected || asset.price || 0;
+                asset.proj_6m = projValue;
+                asset.proj_1yr = projValue;
+                asset.proj_2yr = projValue;
+                asset.proj_3yr = projValue;
+                asset.proj_4yr = projValue;
+                asset.proj_5yr = projValue;
+                delete asset.projected;
+                console.log(`✅ Migrated ${asset.name} projected prices`);
+                needsSave = true;
+            }
+            
+            // Ensure all projection fields exist
+            if (!asset.proj_6m && asset.proj_6m !== 0) asset.proj_6m = 0;
+            if (!asset.proj_1yr && asset.proj_1yr !== 0) asset.proj_1yr = 0;
+            if (!asset.proj_2yr && asset.proj_2yr !== 0) asset.proj_2yr = 0;
+            if (!asset.proj_3yr && asset.proj_3yr !== 0) asset.proj_3yr = 0;
+            if (!asset.proj_4yr && asset.proj_4yr !== 0) asset.proj_4yr = 0;
+            if (!asset.proj_5yr && asset.proj_5yr !== 0) asset.proj_5yr = 0;
+        });
+        
+        if (needsSave) {
+            localStorage.setItem('assets', JSON.stringify(assets));
+        }
+        
+        function saveState() {
+            localStorage.setItem('assets', JSON.stringify(assets));
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            localStorage.setItem('exchangeRate', exchangeRate);
+            localStorage.setItem('manualPriceMode', manualPriceMode);
+            localStorage.setItem('lastPriceUpdate', lastPriceUpdate);
+        }
+        
+        // ===== API FUNCTIONS =====
+        async function fetchCryptoPrices() {
+            const cryptoAssets = assets.filter(a => a.type === 'crypto' && a.symbol);
+            if (cryptoAssets.length === 0) return {};
+            
+            document.getElementById('status').textContent = '⏳ Fetching prices...';
+            
+            const priceData = {};
+            let successCount = 0;
+            let failCount = 0;
+            
+            try {
+                // Fetch each crypto individually using detailed endpoint
+                for (const asset of cryptoAssets) {
+                    try {
+                        console.log(`Fetching price for ${asset.name} (${asset.symbol})...`);
+                        const response = await fetch(`https://api.coingecko.com/api/v3/coins/${asset.symbol}?localization=false&tickers=false&community_data=false&developer_data=false`);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data.market_data && data.market_data.current_price && data.market_data.current_price.usd) {
+                            priceData[asset.symbol] = {
+                                usd: data.market_data.current_price.usd,
+                                price_change_24h: data.market_data.price_change_percentage_24h || 0,
+                                market_cap: data.market_data.market_cap.usd || 0,
+                                image: data.image?.small || ''
+                            };
+                            console.log(`✅ ${asset.name}: $${priceData[asset.symbol].usd}`);
+                            successCount++;
+                        } else {
+                            console.error(`❌ Invalid data structure for ${asset.symbol}`);
+                            failCount++;
+                        }
+                        
+                        // Add small delay to avoid rate limiting
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        
+                    } catch (err) {
+                        console.error(`❌ Error fetching ${asset.name} (${asset.symbol}):`, err.message);
+                        failCount++;
+                    }
+                }
+                
+                if (successCount > 0) {
+                    lastPriceUpdate = new Date().toLocaleString();
+                    saveState();
+                    document.getElementById('status').textContent = `✅ Updated ${successCount} price(s)` + (failCount > 0 ? ` (${failCount} failed)` : '');
+                    updateLastUpdateDisplay();
+                } else {
+                    document.getElementById('status').textContent = '⚠️ All price fetches failed';
+                }
+                
+                setTimeout(() => {
+                    document.getElementById('status').textContent = '';
+                }, 3000);
+                
+                return priceData;
+            } catch (error) {
+                console.error('Error fetching crypto prices:', error);
+                document.getElementById('status').textContent = '⚠️ Price fetch failed';
+                return {};
+            }
+        }
+        
+        // ===== RENDER FUNCTIONS =====
+        function renderAssets(prices = {}) {
+            const tbody = document.querySelector('#assetsTable tbody');
+            tbody.innerHTML = '';
+            
+            let totalValue = 0;
+            let totalCashflow = 0;
+            const projectionTotals = { '6m': 0, '1yr': 0, '2yr': 0, '3yr': 0, '4yr': 0, '5yr': 0 };
+            
+            assets.forEach((asset, index) => {
+                let currentPrice = asset.price || 0;
+                
+                // Update crypto prices from API
+                if (asset.type === 'crypto' && prices[asset.symbol]?.usd) {
+                    currentPrice = prices[asset.symbol].usd;
+                    assets[index].price = currentPrice;
+                    // Auto-save updated prices
+                    saveState();
+                }
+                
+                const amount = parseFloat(asset.amount) || 0;
+                const currentValue = amount * currentPrice;
+                totalValue += currentValue;
+                
+                const isCryptoReadonly = asset.type === 'crypto' && !manualPriceMode;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${asset.name}</strong></td>
+                    <td>${asset.type === 'crypto' ? '🔗 Crypto' : '📝 Manual'}</td>
+                    <td><input type='number' step='any' value='${asset.amount}' onchange='updateAsset(${index}, "amount", this.value)'></td>
+                    <td><input class='input-price' type='number' step='any' value='${currentPrice}' onchange='updateAsset(${index}, "price", this.value)' ${isCryptoReadonly ? 'readonly style="opacity:0.7"' : ''}></td>
+                    <td class='text-right'><strong>${currentValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
+                    <td><input class='input-projection' type='number' step='any' value='${asset.proj_6m || ''}' onchange='updateAsset(${index}, "proj_6m", this.value)' placeholder='${currentPrice}'></td>
+                    <td><input class='input-projection' type='number' step='any' value='${asset.proj_1yr || ''}' onchange='updateAsset(${index}, "proj_1yr", this.value)' placeholder='${currentPrice}'></td>
+                    <td><input class='input-projection' type='number' step='any' value='${asset.proj_2yr || ''}' onchange='updateAsset(${index}, "proj_2yr", this.value)' placeholder='${currentPrice}'></td>
+                    <td><input class='input-projection' type='number' step='any' value='${asset.proj_3yr || ''}' onchange='updateAsset(${index}, "proj_3yr", this.value)' placeholder='${currentPrice}'></td>
+                    <td><input class='input-projection' type='number' step='any' value='${asset.proj_4yr || ''}' onchange='updateAsset(${index}, "proj_4yr", this.value)' placeholder='${currentPrice}'></td>
+                    <td><input class='input-projection' type='number' step='any' value='${asset.proj_5yr || ''}' onchange='updateAsset(${index}, "proj_5yr", this.value)' placeholder='${currentPrice}'></td>
+                    <td><input class='input-xs' type='number' step='any' min='0' value='${asset.apy || ''}' onchange='updateAsset(${index}, "apy", this.value)' placeholder='0'></td>
+                    <td class='text-right' id='cf-${index}'>-</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            renderProjections(projectionTotals);
+            
+            // Add total row
+            const totalRow = document.createElement('tr');
+            totalRow.style.background = '#1a3a5f';
+            totalRow.style.fontWeight = 'bold';
+            totalRow.style.borderTop = '2px solid #00d4ff';
+            totalRow.innerHTML = `
+                <td colspan='4' style='text-align:right; color:#00d4ff;'>TOTAL:</td>
+                <td class='text-right' style='color:#00d4ff;'>${totalValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td class='text-right' style='color:#00d4ff;'>${projectionTotals['6m'].toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+                <td class='text-right' style='color:#00d4ff;'>${projectionTotals['1yr'].toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+                <td class='text-right' style='color:#00d4ff;'>${projectionTotals['2yr'].toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+                <td class='text-right' style='color:#00d4ff;'>${projectionTotals['3yr'].toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+                <td class='text-right' style='color:#00d4ff;'>${projectionTotals['4yr'].toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+                <td class='text-right' style='color:#00d4ff;'>${projectionTotals['5yr'].toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+                <td></td>
+                <td class='text-right' style='color:#00d4ff;' id='cf-total'>-</td>
+            `;
+            tbody.appendChild(totalRow);
+        }
+        
+        function renderProjections(projectionTotals) {
+            let totalCashflow = 0;
+            
+            assets.forEach((asset, index) => {
+                const amount = parseFloat(asset.amount) || 0;
+                const currentPrice = parseFloat(asset.price) || 0;
+                const apy = parseFloat(asset.apy) || 0;
+                
+                // Calculate projections using individual projection values
+                const proj6m = parseFloat(asset.proj_6m) || currentPrice;
+                const proj1yr = parseFloat(asset.proj_1yr) || currentPrice;
+                const proj2yr = parseFloat(asset.proj_2yr) || currentPrice;
+                const proj3yr = parseFloat(asset.proj_3yr) || currentPrice;
+                const proj4yr = parseFloat(asset.proj_4yr) || currentPrice;
+                const proj5yr = parseFloat(asset.proj_5yr) || currentPrice;
+                
+                if (amount > 0) {
+                    // Add to totals
+                    if (projectionTotals) {
+                        projectionTotals['6m'] += amount * proj6m;
+                        projectionTotals['1yr'] += amount * proj1yr;
+                        projectionTotals['2yr'] += amount * proj2yr;
+                        projectionTotals['3yr'] += amount * proj3yr;
+                        projectionTotals['4yr'] += amount * proj4yr;
+                        projectionTotals['5yr'] += amount * proj5yr;
+                    }
+                    
+                    // Calculate monthly cashflow based on current value
+                    const currentValue = amount * currentPrice;
+                    const monthlyCashflow = currentValue * (apy / 100) / 12;
+                    totalCashflow += monthlyCashflow;
+                    const cfElem = document.getElementById(`cf-${index}`);
+                    if (cfElem) {
+                        cfElem.textContent = monthlyCashflow > 0
+                            ? monthlyCashflow.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                            : '-';
+                    }
+                }
+            });
+            
+            // Update total cashflow in summary row
+            const cfTotalElem = document.getElementById('cf-total');
+            if (cfTotalElem) {
+                cfTotalElem.textContent = totalCashflow > 0
+                    ? totalCashflow.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                    : '-';
+            }
+        }
+        
+        function renderExpenses() {
+            const tbody = document.querySelector('#expensesTable tbody');
+            tbody.innerHTML = '';
+            
+            let totalExpenses = 0;
+            
+            expenses.forEach((expense, index) => {
+                const amount = parseFloat(expense.amount) || 0;
+                totalExpenses += amount;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${expense.category}</strong></td>
+                    <td>${expense.desc}</td>
+                    <td><input type='number' step='any' min='0' value='${expense.amount}' onchange='updateExpense(${index}, this.value)'></td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Add total row
+            const totalRow = document.createElement('tr');
+            totalRow.style.background = '#1a3a5f';
+            totalRow.style.fontWeight = 'bold';
+            totalRow.style.borderTop = '2px solid #00d4ff';
+            totalRow.innerHTML = `
+                <td colspan='2' style='text-align:right; color:#00d4ff;'>TOTAL:</td>
+                <td style='text-align:left; color:#00d4ff; padding-left:10px;'>${totalExpenses.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            `;
+            tbody.appendChild(totalRow);
+        }
+        
+        function renderSummary(prices = {}) {
+            const rate = parseFloat(exchangeRate) || 1;
+            
+            // Calculate total asset value
+            let totalAssetUSD = 0;
+            let totalCashflowUSD = 0;
+            
+            assets.forEach((asset, index) => {
+                let price = parseFloat(asset.price) || 0;
+                if (asset.type === 'crypto' && prices[asset.symbol]?.usd) {
+                    price = prices[asset.symbol].usd;
+                }
+                
+                const amount = parseFloat(asset.amount) || 0;
+                const value = amount * price;
+                const apy = parseFloat(asset.apy) || 0;
+                const cashflow = value * (apy / 100) / 12;
+                
+                totalAssetUSD += value;
+                totalCashflowUSD += cashflow;
+            });
+            
+            // Calculate total expenses
+            const totalExpensesUSD = expenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+            
+            // Monthly surplus
+            const monthlySurplusUSD = totalCashflowUSD - totalExpensesUSD;
+            
+            // VND conversions
+            const totalAssetVND = totalAssetUSD * rate;
+            const totalCashflowVND = totalCashflowUSD * rate;
+            const totalExpensesVND = totalExpensesUSD * rate;
+            const monthlySurplusVND = monthlySurplusUSD * rate;
+            
+            const summaryHTML = `
+                <p>💎 <strong>Total Asset Value:</strong> <b>${totalAssetUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD</b> 
+                   (${totalAssetVND.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})} VND)</p>
+                
+                <p>📈 <strong>Monthly Cashflow (from APY):</strong> <b>${totalCashflowUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD</b> 
+                   (${totalCashflowVND.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})} VND)</p>
+                
+                <p>💸 <strong>Total Monthly Expenses:</strong> <b>${totalExpensesUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD</b> 
+                   (${totalExpensesVND.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})} VND)</p>
+                
+                <p style="font-size: 1.2em; margin-top: 20px; padding-top: 20px; border-top: 2px solid #00d4ff;">
+                   ${monthlySurplusUSD >= 0 ? '✅' : '⚠️'} <strong>Monthly Net Cashflow:</strong> 
+                   <b style="color: ${monthlySurplusUSD >= 0 ? '#00ff88' : '#ff4444'}">
+                   ${monthlySurplusUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD</b> 
+                   (${monthlySurplusVND.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})} VND)
+                </p>
+            `;
+            
+            document.getElementById('summarySection').innerHTML = summaryHTML;
+        }
+        
+        // ===== UPDATE FUNCTIONS =====
+        function updateAsset(index, field, value) {
+            assets[index][field] = parseFloat(value) || 0;
+            saveState();
+            renderAssets();
+            renderSummary();
+        }
+        
+        function updateExpense(index, value) {
+            expenses[index].amount = parseFloat(value) || 0;
+            saveState();
+            renderExpenses();
+            renderSummary();
+        }
+        
+        function toggleManualMode(enabled) {
+            manualPriceMode = enabled;
+            saveState();
+            renderAssets();
+            if (enabled) {
+                document.getElementById('status').textContent = '✏️ Manual price editing enabled';
+                setTimeout(() => {
+                    document.getElementById('status').textContent = '';
+                }, 2000);
+            }
+        }
+        
+        function updateLastUpdateDisplay() {
+            const elem = document.getElementById('lastUpdate');
+            if (elem) {
+                elem.textContent = `Last update: ${lastPriceUpdate}`;
+            }
+        }
+        
+        function resetData() {
+            if (confirm('⚠️ This will clear ALL your data (assets, expenses, prices). Are you sure?')) {
+                localStorage.clear();
+                console.log('🗑️ All data cleared');
+                location.reload();
+            }
+        }
+        
+        async function updateAll() {
+            exchangeRate = parseFloat(document.getElementById('exrate').value) || 24500;
+            saveState();
+            
+            const prices = await fetchCryptoPrices();
+            renderAssets(prices);
+            renderExpenses();
+            renderSummary(prices);
+        }
+        
+        // ===== INITIALIZATION =====
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('exrate').value = exchangeRate;
+            document.getElementById('manualMode').checked = manualPriceMode;
+            updateLastUpdateDisplay();
+            updateAll();
+        });
+    </script>
+</body>
+</html>
